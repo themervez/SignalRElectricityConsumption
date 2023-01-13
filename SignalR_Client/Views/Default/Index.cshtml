@@ -1,0 +1,32 @@
+﻿@{
+    ViewData["Title"] = "Index";
+}
+
+<script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"> </script>
+
+<h1>Elektrik Tüketim Grafiği</h1>
+
+@section Scripts
+    {
+    <script type="text/javascript">
+
+        $(document).ready(() => {
+
+            var connection = new signalR.HubConnectionBuilder().withUrl("https://localhost:44334/ElectricHub").build();
+
+            connection.start().then(() => {
+                connection.invoke("GetElectricList");
+            }).catch((err) => {
+                console.log(err);
+            })
+
+            connection.on("ReceiveElectricList", (electricList) => {
+                console.log(electricList);
+            })
+
+        })
+
+    </script>
+}
+
