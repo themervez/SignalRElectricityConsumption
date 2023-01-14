@@ -13,7 +13,7 @@ namespace SignalR_API.Hubs
         }
         public async Task GetElectricList()
         {
-            await Clients.All.SendAsync("ReceiveElectricList", "Elektrik verilerini al");//connection.on ile bağlanılacak:ReceiveElectricList invoke:GetElectricList
+            await Clients.All.SendAsync("ReceiveElectricList",_service.GetElectricChartList());//connection.on ile bağlanılacak:ReceiveElectricList invoke:GetElectricList
         }
     }
 }

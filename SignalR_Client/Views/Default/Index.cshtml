@@ -2,10 +2,10 @@
     ViewData["Title"] = "Index";
 }
 
-<script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
-<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"> </script>
-
 <h1>Elektrik Tüketim Grafiği</h1>
+
+<script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 
 @section Scripts
     {
@@ -13,20 +13,48 @@
 
         $(document).ready(() => {
 
+            var electricChartList = new Array();
+
+            electricChartList.push(["Tarih", "Mersin", "Adana", "İstanbul", "Ankara", "İzmir"]);
+
             var connection = new signalR.HubConnectionBuilder().withUrl("https://localhost:44334/ElectricHub").build();
 
             connection.start().then(() => {
-                connection.invoke("GetElectricList");
+                connection.invoke("GetElectricList");//ElectricHub'da bulunan GetElectricList metodu
             }).catch((err) => {
                 console.log(err);
             })
 
-            connection.on("ReceiveElectricList", (electricList) => {
-                console.log(electricList);
+            //connection.on("ReceiveElectricList", (electricList) => {
+            //    console.log(electricList);
+            //})
+            connection.on("ReceiveElectricList", (GetElectricChartList) => {
+                electricChartList = electricChartList.splice(0, 1);
+                GetElectricChartList.forEach((item) => {
+                    electricChartList.push([item.electricDate, item.counts[0], item.counts[1], item.counts[2], item.counts[3], item.counts[4]]);
+                })
+
+                google.charts.load('current', { 'packages': ['corechart'] });
+                google.charts.setOnLoadCallback(drawChart);
+                /* console.log(GetElectricChartList);*/
             })
 
+            function drawChart() {
+                var data = google.visualization.arrayToDataTable(electricChartList);
+
+                var options = {
+                    title: 'Elektrik Tüketim Grafiği',
+                    curveType: 'none',
+                    legend: { position: 'bottom' }
+                };
+                var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
+
+                chart.draw(data, options);
+            }
         })
 
     </script>
 }
+
+<div id="curve_chart" style="width:1200px; height:800px"></div>
 
